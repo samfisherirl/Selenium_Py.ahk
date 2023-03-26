@@ -10,9 +10,10 @@ from pathlib import Path
 
     #options = ChromeOptions()
     #options.add_experimental_option('excludeSwitches', ['enable-logging'])
-log = Path.cwd() / "log.txt"
+log = Path.cwd()  / "log.txt"
 out = Path.cwd() / "log_out.txt"
-    
+print(log)
+print(out)
 driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
 
 class Sel:
@@ -23,30 +24,31 @@ class Sel:
 
     def listener(self):
         while True:
-            sleep(1)
+            sleep(.5)
             if self.running == False:
                 break
             else:
                 self.reader()
 
+            
+    def reader(self):
+        if Path.is_file(log):
+            with open(log, "r") as f:
+                command = f.read()
+            if str(command) == "False":
+                return True
+            else:
+                print("\n\nSuccess!\n\n")
+                self.commander(command)        
+        else:
+            self.write_ahk_log("False", log)
+        
+
     @staticmethod
-    def writersingle(notes, file):
+    def write_ahk_log(notes, file):
         with open(file, "w") as f:
             f.write(notes)
             
-    def reader(self):
-        try:
-            with open(log, "r") as f:
-                command = f.read()
-                if "False" in str(command):
-                    return True
-                else:
-                    print("\n\nSuccess!\n\n")
-            self.commander(command)        
-        except Exception as e:
-            self.err(e)
-            return True
-
     def commander(self, command):
         try:
             if command.count("--") == 2:
@@ -73,7 +75,7 @@ class Sel:
             func(arg[0])
         elif len(arg) == 2:
             func(arg[0], arg[1])
-        self.writersingle("False", log)
+        self.write_ahk_log("False", log)
 
     def get(self, url):
         """Navigates to the specified URL"""
@@ -97,6 +99,11 @@ class Sel:
         out_data = self.find_element(com, value).get_attribute("href")
         self.write_out(out_data)
         
+    def get_links(self, locator, value):
+        com = getattr(By, locator)
+        out_data = self.find_elements(com, value).get_attribute("href")
+        self.write_out(out_data)
+        
     def wait_until_element_visible(self, locator, value, timeout=10):
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((locator, value)))
 
@@ -113,7 +120,7 @@ class Sel:
             if args:
                 for i in args:
                     f.write(f"{i}\n")
-        self.writersingle("False", log)
+        self.write_ahk_log("False", log)
     ##################################################
     def get_links(self):
         links = driver.find_elements_by_tag_name("a")
