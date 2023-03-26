@@ -4,6 +4,8 @@ Selenium_Py.ahk
 Using the Selenium 4 python library to pull Chrome webdriver, pass commands, and retrieve values or interact.
 Following syntax, found here: https://www.selenium.dev/documentation/#tabs-03-01 (python)
 
+Download exe for Selenium driver and python here: https://github.com/samfisherirl/Selenium_Py.ahk/releases/download/v1/Selenium_Py.ahk.zip
+
 EXE compiled for driver here. https://github.com/samfisherirl/Selenium_Py.ahk
 
 ```autohotkey
