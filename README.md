@@ -9,18 +9,20 @@ Download exe for Selenium driver and python here: https://github.com/samfisherir
 EXE compiled for driver here. https://github.com/samfisherirl/Selenium_Py.ahk
 
 ```autohotkey
-Drivers.sendCommand("--get--https://github.com/samfisherirl")
-;get for navigating to url, separated by "--"
+
+params := ["get", "https://slatestarcodex.com/"]
+obj := Selenium.Commands(Params, settings)
+
+PID := obj.start()
+returnValue := obj.call() ; true if no value but successful
+
+obj.updateParams(["click", "LINK_TEXT", "INTRODUCING ASTRAL CODEX TEN"])
+obj.call()
+
+obj.updateParams(["get_links"])
+
 ```
-```autohotkey
-Drivers.sendCommand("--click--LINK_TEXT--github.ahk")
-;By.LINK_TEXT for reference, "github.ahk"
-```
-```autohotkey
-msg := Drivers.retrieveValue("--get_link--ID--pull-requests-tab")
-msgbox(msg) ; retrieves url for pull request tab
-```
-Very messy, just a concept so far. I have extra functions and need to reorganize, but I just wanted to put it out in the ether for feedback. I may move to passing command lines instead of log data, we'll see.
+ Very messy, just a concept so far. I have extra functions and need to reorganize, but I just wanted to put it out in the ether for feedback. I may move to passing command lines instead of log data, we'll see.
 
 Log.txt stores "false" until command written to file, listener imports function and args. upon completing task, value returns to false to notify ahk.
 log_out.txt stores return values including single or lists of links.
