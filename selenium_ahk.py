@@ -14,6 +14,8 @@ out = Path.cwd() / "log_out.txt"
     #options = ChromeOptions()
     #options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
+driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
+
 class Sel:
     def __init__(self):
         self.links = []
@@ -56,26 +58,28 @@ class Sel:
     def commander(self, command):
         try: 
             counter = command.count("--") 
-            if counter == 2:
-                command = command.split("--")
-                if command[1] == "quit":
-                    self.close_driver()
-                else:
-                    self.call_function_by_name(command[1], command[2])
-            elif counter == 3:
-                command = command.split("--")
-                self.call_function_by_name(command[1], command[2], command[3])
+            command = command.split("--")       
+            if command[1] == "quit":
+                self.close_driver()
             elif counter == 1:
-                command = command.split("--")
-                if command[1] == "quit":
-                    self.close_driver()
-                else:
-                    self.call_function_by_name(command[1])
+                self.call_function_by_name(command[1])
+            elif counter == 2:
+                self.call_function_by_name(command[1], command[2])
+            elif counter == 3:
+                self.call_function_by_name(command[1], command[2], command[3])
+            elif counter == 4:
+                self.call_function_by_name(command[1], command[2],command[3], command[4])
+            
         except Exception as e:
             print(str(e))
             Sel.write_ahk_log(str(e), out)
             self.close_driver()
-            
+    
+    def enum_commands(self, *args):
+        if args[0]:
+            self.call_function_by_name(args[0])
+        else:
+            self.call_function_by_name(args[0], args[1:])
             
     def call_function_by_name(self, function_name, *arg):
         print(f"\n\ncall\n{function_name}\n{arg}\n")
@@ -181,16 +185,10 @@ class Sel:
         return
 
 if __name__ == "__main__":
-    log = Path.cwd()  / "log.txt"
-    temp = Path.cwd()  / "temp.txt"
-    out = Path.cwd() / "log_out.txt"
     print(log)
     print(out)
-    driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
     Sel.delete_er()
     S = Sel()
-    S.get("https://www.slatestarcodex.com/")
-    S.all_links()
     S.listener()
     #drivers = Sel() 
     #drivers.get("https://www.github.com/")

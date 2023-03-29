@@ -10,7 +10,6 @@ chrome.newCall(["get_link", "PARTIAL_LINK_TEXT", "ARCHIVE"])
 MsgBox(chrome.read())
 
 chrome.newCall(["all_links"])
-chrome.newCall(["get_link", "CLASS_NAME", "data"])
 MsgBox(chrome.read())
 
 ; returns link by text name
@@ -57,6 +56,7 @@ class Selenium
         start() {
             if !FileExist(this.log) and !FileExist(this.temp) {
                 msg := "This may be your first time using, please restart after selenium driver download."
+                msgbox(msg)
                 this.stringify()
                 Run(this.selpath, this.folder, , &PID)
                 exitapp
