@@ -1,18 +1,16 @@
 # Selenium_Py.ahk
-Selenium_Py.ahk
+Using the Selenium 4 Python library to pull Chrome WebDriver, pass commands and clicks, and retrieve or supply values.
+.exe compiled for python driver here:
+https://github.com/samfisherirl/Selenium_Py.ahk (if you enjoy, drop a star for an up and coming dev)
 
-Using the Selenium 4 python library to pull Chrome webdriver, pass commands, and retrieve values or interact.
-Following syntax, found here: https://www.selenium.dev/documentation/#tabs-03-01 (python)
-
-Download exe for Selenium driver and python here: https://github.com/samfisherirl/Selenium_Py.ahk/releases/download/v1/Selenium_Py.ahk.zip
-
-EXE compiled for driver here. https://github.com/samfisherirl/Selenium_Py.ahk
 
 Finding web elements https://www.selenium.dev/documentation/webdriver/elements/finders/
 Locating the elements based on the provided locator values. https://www.selenium.dev/documentation/webdriver/elements/interactions/
 Interacting with web elementshttps://www.selenium.dev/documentation/webdriver/elements/interactions/
 
 todo: needs to be able to input form data, should be running soon.
+
+A high-level instruction set for manipulating chrome and web controls.
 
 ```autohotkey
 ;A high-level instruction set for manipulating form controls.
