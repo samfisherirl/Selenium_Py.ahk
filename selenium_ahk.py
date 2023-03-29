@@ -8,23 +8,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 from pathlib import Path
 
+log = Path.cwd()  / "log.txt"
+temp = Path.cwd()  / "temp.txt"
+out = Path.cwd() / "log_out.txt"
     #options = ChromeOptions()
     #options.add_experimental_option('excludeSwitches', ['enable-logging'])
-log = Path.cwd()  / "log.txt"
-out = Path.cwd() / "log_out.txt"
-print(log)
-print(out)
-driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
 
 class Sel:
     def __init__(self):
         self.links = []
         self.running = True
         self.element = None
+        self.lastcommand = ""
+        self.counter = 0
 
     def listener(self):
         while True:
-            sleep(.5)
+            sleep(1)
             if self.running == False:
                 break
             else:
@@ -32,50 +32,63 @@ class Sel:
 
             
     def reader(self):
-        if Path.is_file(log):
-            with open(log, "r") as f:
-                command = f.read()
-            if str(command) == "False":
+        if Path.is_file(temp):
+            with open(temp, "r") as f:
+                command = f.read() 
+            with open(log, "w") as f:
+                f.write("True")
+            if command == self.lastcommand or command == "":
                 return True
             else:
-                print("\n\nSuccess!\n\n")
-                self.commander(command)        
+                print(f"\n\nSuccess!\n{command}\n")
+                self.lastcommand = command
+                self.commander(command)
         else:
-            self.write_ahk_log("False", log)
+            Sel.write_ahk_log("False", log)
         
 
     @staticmethod
     def write_ahk_log(notes, file):
         with open(file, "w") as f:
+            print(notes)
             f.write(notes)
             
     def commander(self, command):
-        try:
-            if command.count("--") == 2:
+        try: 
+            counter = command.count("--") 
+            if counter == 2:
                 command = command.split("--")
-                self.call_function_by_name(command[1], command[2])
-            elif command.count("--") == 3:
+                if command[1] == "quit":
+                    self.close_driver()
+                else:
+                    self.call_function_by_name(command[1], command[2])
+            elif counter == 3:
                 command = command.split("--")
                 self.call_function_by_name(command[1], command[2], command[3])
-            elif command.count("--") == 1:
+            elif counter == 1:
                 command = command.split("--")
-                print(str(command))
-                self.call_function_by_name(command[1])
-            elif command == "-quit":
-                self.close_driver()
+                if command[1] == "quit":
+                    self.close_driver()
+                else:
+                    self.call_function_by_name(command[1])
         except Exception as e:
             print(str(e))
-            sleep(15)
+            Sel.write_ahk_log(str(e), out)
+            self.close_driver()
+            
             
     def call_function_by_name(self, function_name, *arg):
+        print(f"\n\ncall\n{function_name}\n{arg}\n")
         func = getattr(self, function_name)
         if not arg:
             func()
         elif len(arg) == 1:
+            print(str(arg))
             func(arg[0])
         elif len(arg) == 2:
+            print(str(arg))
             func(arg[0], arg[1])
-        self.write_ahk_log("False", log)
+        Sel.write_ahk_log("False", log) 
 
     def get(self, url):
         """Navigates to the specified URL"""
@@ -86,6 +99,9 @@ class Sel:
     def find_element(self, locator, value):
         return driver.find_element(locator, value)
 
+    def find_elements(self, locator, value):
+        return driver.find_elements(locator, value)
+
     def by(self, locator, value):
         com = getattr(By, locator)
         self.element = self.find_element(com, value)
@@ -93,54 +109,89 @@ class Sel:
     def click(self, locator, value):
         com = getattr(By, locator)
         self.find_element(com, value).click()
+        #print("\n\n\nclicking")
+        #com = getattr(By, locator)
+        #link = self.find_element(com, value).get_attribute("href")
+        #link.click()
     
     def get_link(self, locator, value):
         com = getattr(By, locator)
-        out_data = self.find_element(com, value).get_attribute("href")
-        self.write_out(out_data)
+        link = self.find_element(com, value)
+        out_data = link.get_attribute("href")
+        if "Message: no such element" in out_data:
+            self.err(self, out_data)
+        else:
+            self.write_listor_string(out_data)
+        return out_data
         
-    def get_links(self, locator, value):
-        com = getattr(By, locator)
-        out_data = self.find_elements(com, value).get_attribute("href")
-        self.write_out(out_data)
+    def all_links(self):
+        links = self.find_elements(By.TAG_NAME, "a")
+        urls = [link.get_attribute("href") for link in links]
+        text = [link.text for link in links]
+        list = {f"{k}: {v}" for k, v in zip(urls, text)}
+        self.write_listor_string(list)
+    # def all_links(self):
+    #     links = driver.find_elements(By.TAG_NAME, "a")
+    #     urls = [link.get_attribute("href") for link in links]
+    #     text = [link.text for link in links]
+    #     dic = {k: v for k, v in zip(urls, text)}
+    #     self.write_listor_string(str(dic))
         
-    def wait_until_element_visible(self, locator, value, timeout=10):
+    def wait_until_element_visible(self, locator, value, timeout=1):
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((locator, value)))
 
 
     def pass_return_to_ahk(val):
         pass
 
+    @staticmethod
+    def delete_er():
+        with open("er.txt", "w") as f:
+            f.write("")
+    
     def err(self, e):
-        with open("er.txt", "a") as f:
+        print(str(e))
+        with open("er.txt", "a", errors="ignore") as f:
             f.write(str(e))
+        with open("er.txt", "a", errors="ignore") as f:
+            f.write(str(e))
+        self.close_driver()
+        
 
-    def write_out(self, *args):
-        with open(out, "w") as f:
+    def write_listor_string(self, *args):
+        with open(out, "w", errors="replace") as f:
             if args:
-                for i in args:
-                    f.write(f"{i}\n")
-        self.write_ahk_log("False", log)
-    ##################################################
-    def get_links(self):
-        links = driver.find_elements_by_tag_name("a")
-        urls = [link.get_attribute("href") for link in links]
-        text = [link.text for link in links]
-        dic = {k: v for k, v in zip(urls, text)}
-        self.writer(dic, "links")
-
+                [f.write(f"{i}\n") for i in args]
+                    
+        Sel.write_ahk_log("False", log)
+    #################################################
+        
     def writer(self, dic, filename):
-        file = Path(__file__).parent / filename
-        with open(f"{file}.txt", "w") as f:
+        file = Path(__file__).parent / "log_out.txt"
+        with open(f"{file}", "w", errors="ignore") as f:
             for k, v in dic.items():
                 f.write(f",{k},{v},\n")
+        Sel.write_ahk_log("False", log)
 
 
     def close_driver(self):
         """Closes the webdriver instance"""
         driver.quit()
         self.running = False
+        return
 
 if __name__ == "__main__":
-    drivers = Sel() 
-    drivers.listener()
+    log = Path.cwd()  / "log.txt"
+    temp = Path.cwd()  / "temp.txt"
+    out = Path.cwd() / "log_out.txt"
+    print(log)
+    print(out)
+    driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
+    Sel.delete_er()
+    S = Sel()
+    S.get("https://www.slatestarcodex.com/")
+    S.all_links()
+    S.listener()
+    #drivers = Sel() 
+    #drivers.get("https://www.github.com/")
+    #drivers.all_links()
